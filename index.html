@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <title>文字盤</title>
+</head>
+<body>
+    <main class="container" style="margin-top: 50px;">
+        <h2>板リスト</h2>
+        <p id="num"></p>
+        <ul id="lists" class="list-group"></ul>
+        <input type="text" id="new_name" class="form-control" style="margin-top: 20px;">
+        <button id="new_btn" class="btn btn-primary" style="margin-top: 5px; width: 100%;"><span id="new_load" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>  新規板の作成</button>
+    </main>
+    <script>
+        const lists = document.getElementById("lists");
+        const new_btn = document.getElementById("new_btn");
+        const new_load = document.getElementById("new_load");
+        const new_name = document.getElementById("new_name");
+        const num = document.getElementById("num");
+
+        window.onload = () =>{
+            fetch("api/board.php?type=get").then(response =>{
+                if (response.ok) {
+                    return response.json();
+                }else{
+                    alert("Error");
+                }
+            }).then(res =>{
+                if(res.code === "200"){
+                    num.innerText = res.num + "枚の板"
+                    document.title = "板: " + res.num + " / 文字盤";
+                    res.data.forEach(value =>{
+                        const pElement = document.createElement("li");
+                        const cElement = document.createElement("a");
+                        cElement.setAttribute("href", `board.html?${value.id}`);
+                        cElement.innerText = value.name;
+                        pElement.className = "list-group-item";
+                        pElement.appendChild(cElement);
+                        lists.appendChild(pElement);
+                    });
+                }else{
+                    alert("Error");
+                }
+            }).catch(e =>{
+                alert(`Error: ${e.message}`);
+            });
+        }
+
+        new_btn.onclick = () =>{
+            new_btn.disabled = true;
+            new_load.style.display = "";
+            fetch("api/board.php?type=new&name=" + new_name.value).then(response =>{
+                if (response.ok) {
+                    return response.json();
+                }else{
+                    alert("Error");
+                }
+            }).then(res =>{
+                if(res.code === "200"){
+                    alert("作成しました。");
+                    window.location = "board.html?" + res.id;
+                }else{
+                    alert("Error");
+                }
+            }).catch(e =>{
+                alert(`Error: ${e.message}`);
+            });
+        }
+    </script>
+</body>
+</html>
