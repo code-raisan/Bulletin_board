@@ -5,24 +5,60 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
     <title>文字盤</title>
 </head>
 <body>
+    <aside>
+        <div class="modal fade" id="Modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="padding: 20px;">
+                    <div class="mov">
+                        <div class="modal-body movie__inner" id="emvideo"></div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 5px;" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </aside>
     <main class="container" style="margin-top: 50px;">
         <h2 id="title"></h2>
         <p id="board_id"></p>
         <p id="create_time"></p>
-        <a href="." class="btn btn-primary">板リストへ</a>
+        <a href="." class="btn btn-primary"><i class="bi bi-list-nested"></i>板リストへ</a>
         <input type="text" id="new_name" class="form-control" placeholder="名前" style="margin-top: 20px;">
         <input type="text" id="new_text" class="form-control" placeholder="内容" style="margin-top: 5px;">
-        <button id="new_btn" class="btn btn-primary" style="margin-top: 5px; width: 100%;"><span id="new_load" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span> 投稿</button>
+        <button id="new_btn" class="btn btn-primary" style="margin-top: 5px; width: 100%;"><span id="new_load" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span> <i class="bi bi-sticky"></i>投稿</button>
         <ul id="lists" class="list-group" style="margin-top: 20px;"></ul>
     </main>
     <style>
         p{
             margin: 0;
         }
+
+        .btn-sm{
+            width: 100%;
+        }
+
+        #mov{
+            width: 60%;
+            margin: 0 auto;
+        }
+        
+        .movie__inner {
+            position: relative;
+            padding-bottom: calc(315 / 560 * 100%);
+        }
+        
+        .movie__iframe {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
     <script>
         const title = document.getElementById("title");
         const lists = document.getElementById("lists");
@@ -32,6 +68,7 @@
         const new_load = document.getElementById("new_load");
         const new_name = document.getElementById("new_name");
         const new_text = document.getElementById("new_text");
+        const emvideo = document.getElementById("emvideo");
 
         const get_post = () =>{
             fetch("api/chat.php?type=get&id=" + (window.location.search).replace("?", ""))
@@ -47,6 +84,19 @@
                     title.innerText = res.board_name;
                     create_time.innerText = res.create_time + "に作成"
                     document.title = res.board_name + " / 文字盤";
+                    const pattern = /https?:\/\/(m.youtube.com|www.youtube.com|youtube.com|youtu.be)\/(watch\?v=|)([\-\w~]+)/;
+                    const emyoutube = (value) =>{
+                        const cElement5 = document.createElement("button");
+                        cElement5.className = "btn btn-primary btn-sm";
+                        cElement5.innerHTML = `<i class="bi bi-youtube"></i>再生ウィンドウを開く`;
+                        cElement5.type = "button";
+                        cElement5.onclick = () =>{
+                            emvideo.innerHTML = `<iframe class="movie__iframe" src="https://www.youtube-nocookie.com/embed/${pattern.exec(value.text)[3]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        }
+                        cElement5.setAttribute("data-bs-toggle", "modal");
+                        cElement5.setAttribute("data-bs-target", "#Modal");
+                        return cElement5;
+                    }
                     res.data.forEach(value =>{
                         const pElement0 = document.createElement("li");
                         const pElement1 = document.createElement("p");
@@ -65,6 +115,10 @@
                         pElement1.appendChild(cElement3);
                         pElement1.appendChild(cElement1);
                         pElement1.appendChild(cElement2);
+                        if(pattern.test(value.text)){
+                            pElement1.appendChild(document.createElement("br"));
+                            pElement1.appendChild(emyoutube(value));
+                        }
                         pElement0.appendChild(pElement1);
                         lists.appendChild(pElement0);
                     });
