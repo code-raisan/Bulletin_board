@@ -62,7 +62,7 @@
                 }
             }).then(res =>{
                 if(res.code === "200"){
-                    alert("作成しました。");
+                    alert("作成しました。\n板ID: " + res.id);
                     window.location = "board.html?" + res.id;
                 }else{
                     alert("Error");

@@ -14,7 +14,7 @@ if($_GET["type"] === "new" || $_GET["type"] === "get"){
         }
     }elseif($_GET["type"] === "new"){
         if(!empty($_GET["name"]) && !empty($_GET["text"]) && !empty($_GET["id"])){
-            $ID = $_GET["id"];
+            $ID = str_replace("/", "", $_GET["id"]);
             if(file_exists("data/chat/{$ID}.json")){
                 $list = json_decode(file_get_contents("data/chat/{$ID}.json"), true);
                 $list["data"][] = ["time" => date("Y/m/d H:i:s"), "post_id" => count($list["data"]), "name" => $_GET["name"], "text" => $_GET["text"], "ip" => $_SERVER["REMOTE_ADDR"]];
